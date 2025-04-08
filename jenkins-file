@@ -1,1 +1,43 @@
+pipeline {
+    agent any
+    tools {
+        nodejs 'nodejs16'
+    }
+    stages {
+        stage('Clean  WS') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage ('Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Prashanthpanjaala/Zomato-Repo.git'
+            }
+        }
+        stage ('Build') {
+            steps {
+                sh 'npm install'
+            }
+        }
+        stage ('Dockerfile') {
+            steps {
+                sh 'docker build -t devopsprashanth/repo:zomato .'
+            }
+        }
+        stage ('DockerHub') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'dockerhub') {
+                        sh 'docker push devopsprashanth/repo:zomato'
+                    }
+                }
+            }
+        }
+        stage('Container') {
+            steps {
+                sh 'docker run -itd --name zomato -p 3000:3000 devopsprashanth/repo:zomato'
+            }
+        }
+    }
+}
 
